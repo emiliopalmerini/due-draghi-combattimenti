@@ -1,0 +1,157 @@
+package templates
+
+import (
+	"strconv"
+	"github.com/emiliopalmerini/due-draghi-emporium/internal/application/encounter"
+)
+
+templ Result(result *encounter.CalculateXPResponse) {
+	<div class="result-card">
+		<!-- Header with XP -->
+		<div class="result-header">
+			<h2>Budget XP: <span class="xp-value">{ strconv.Itoa(result.TotalXP) }</span></h2>
+		</div>
+
+		<!-- Ruleset and Party Info -->
+		<div class="result-info-grid">
+			<div class="result-info-item">
+				<span class="result-info-label">Regole</span>
+				<span class="result-info-value">D&D { result.Ruleset }</span>
+			</div>
+			<div class="result-info-item">
+				<span class="result-info-label">Personaggi</span>
+				<span class="result-info-value">{ strconv.Itoa(result.PartySize) } membri</span>
+			</div>
+			<div class="result-info-item">
+				<span class="result-info-label">Livelli</span>
+				<span class="result-info-value">
+					for i, level := range result.CharacterLevels {
+						if i > 0 {
+							<span>, </span>
+						}
+						{ strconv.Itoa(level) }
+					}
+				</span>
+			</div>
+		</div>
+
+
+
+		<!-- Tips and Usage -->
+		<div class="result-tips">
+			<h3>💡 Suggerimenti per l'Uso</h3>
+			<ul>
+				<li>Usate questo budget XP per selezionare mostri dal Manuale dei Mostri</li>
+				if result.Ruleset != "2014" {
+					<li>Potete distribuire l'XP su più mostri per variare l'incontro</li>
+				}
+				<li>Considerate gli oggetti magici e gli effetti speciali quando selezionate i nemici</li>
+				if result.Ruleset == "2014" {
+					<li>Il moltiplicatore dei mostri è già stato applicato</li>
+				}
+				if result.PartySize == 1 {
+					<li>Un solo personaggio contro un incontro è più difficile. Considerate di scalare verso il basso</li>
+				}
+				if result.PartySize > 5 {
+					<li>Una party numerosa potrebbe trovare gli incontri più facili. Aggiungete mostri se necessario</li>
+				}
+			</ul>
+		</div>
+
+		<!-- Copy Button -->
+		<div style="margin-top: 2rem; display: flex; gap: 0.5rem;">
+			<button
+				type="button"
+				class="btn btn-secondary"
+				onclick="copyResult()"
+				title="Copia i risultati"
+			>
+				📋 Copia Risultati
+			</button>
+		</div>
+
+		<!-- Find Monsters Section -->
+		<div style="margin-top: 1.5rem; padding: 1.5rem; background: var(--notion-light-bg); border-left: 4px solid var(--notion-link); border-radius: 4px;">
+			<p style="margin: 0 0 1rem 0; font-size: 0.9rem; color: var(--notion-text-secondary);">
+				🔍 La ricerca ti porterà a <strong>quintaedizione.online</strong> dove potrai trovare i mostri corrispondenti
+			</p>
+			<form style="display: flex; gap: 0.5rem;" onsubmit="searchMonstersRedirect(event)">
+				<input
+					type="text"
+					id="monster-search"
+					name="q"
+					placeholder="Cerca un mostro..."
+					style="flex: 1; padding: 0.75rem; border: 1px solid var(--notion-border); border-radius: 4px; background: var(--notion-bg); color: var(--notion-text); font-family: inherit;"
+					required
+				/>
+				<button
+					type="submit"
+					class="btn btn-secondary"
+					style="white-space: nowrap;"
+				>
+					🔍 Cerca
+				</button>
+			</form>
+		</div>
+	</div>
+
+	<script>
+		function searchMonstersRedirect(event) {
+			event.preventDefault();
+			const query = document.getElementById('monster-search').value.trim();
+			if (query) {
+				const url = `https://quintaedizione.online/mostri?q=${encodeURIComponent(query)}`;
+				window.open(url, '_blank', 'noopener,noreferrer');
+			}
+		}
+
+		function copyResult() {
+			const card = document.querySelector('.result-card');
+			const xp = card.querySelector('.xp-value').textContent;
+			const items = card.querySelectorAll('.result-info-item');
+			
+			let regole = '';
+			let personaggi = '';
+			let livelli = '';
+			
+			items.forEach(item => {
+				const label = item.querySelector('.result-info-label').textContent;
+				const value = item.querySelector('.result-info-value').textContent.trim();
+				
+				if (label === 'Regole') {
+					regole = value;
+				} else if (label === 'Personaggi') {
+					personaggi = value.split(' ')[0]; // Extract just the number
+				} else if (label === 'Livelli') {
+					livelli = value;
+				}
+			});
+			
+			const text = `Budget XP: ${xp}
+Regole: ${regole}
+Personaggi: ${personaggi}
+Livelli: ${livelli}`;
+
+			if (navigator.clipboard) {
+				navigator.clipboard.writeText(text).then(() => {
+					const btn = event.target;
+					const originalText = btn.textContent;
+					btn.textContent = '✓ Copiato!';
+					setTimeout(() => {
+						btn.textContent = originalText;
+					}, 2000);
+				});
+			}
+		}
+
+
+	</script>
+}
+
+func makeIntSliceStr(arr []int) []string {
+	result := make([]string, len(arr))
+	for i, v := range arr {
+		result[i] = strconv.Itoa(v)
+	}
+	return result
+}

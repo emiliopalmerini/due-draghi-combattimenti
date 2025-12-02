@@ -1,0 +1,159 @@
+package templates
+
+templ Base(title string, children ...templ.Component) {
+	<!DOCTYPE html>
+	<html lang="it">
+	<head>
+		<meta charset="utf-8"/>
+		<title>
+			if title != "" {
+				{ title }
+			} else {
+				Combattimenti Online - Calcolatore di Incontri D&D
+			}
+		</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		<script src="https://unpkg.com/htmx.org@2.0.3"></script>
+		<link rel="stylesheet" href="/static/style.css"/>
+		<link rel="icon" href="/static/favicon.svg" type="image/svg+xml"/>
+	</head>
+	<body style="min-height: 100vh; display: flex; flex-direction: column; background: var(--notion-bg); color: var(--notion-text);">
+		<!-- Notion-style top bar -->
+		<header class="notion-nav">
+			<div class="notion-nav-container">
+				<nav class="breadcrumb" aria-label="Breadcrumb">
+					<a href="/" class="btn">Combattimenti</a>
+					<span style="color: var(--notion-text-light);">/</span>
+					<span style="color: var(--notion-text); font-weight: 500;">Calcolatore</span>
+				</nav>
+			</div>
+		</header>
+
+		<!-- Notion-style content area -->
+		<main style="flex: 1; background: var(--notion-bg);">
+			<div id="page-root" hx-history-elt class="container" style="max-width: 1024px; padding-top: 2rem; padding-bottom: 2rem;">
+				{ children... }
+				<div id="page-loading" class="page-overlay" aria-hidden="true">
+					<div class="page-overlay-inner">
+						<span class="spinner"></span>
+					</div>
+				</div>
+			</div>
+		</main>
+
+		@footer()
+
+		<script>
+			document.addEventListener('DOMContentLoaded', function() {
+				// HTMX request started
+				document.body.addEventListener('htmx:xhr:loadstart', function() {
+					document.getElementById('page-loading').style.display = 'flex';
+				});
+
+				// HTMX request ended
+				document.body.addEventListener('htmx:xhr:loadend', function() {
+					document.getElementById('page-loading').style.display = 'none';
+				});
+
+				// Form submission
+				const form = document.getElementById('encounter-form');
+				if (form) {
+					// Ruleset toggle
+					const rulesetRadios = document.querySelectorAll('input[name="ruleset"]');
+					const difficulty2024Panel = document.getElementById('difficulty-2024-panel');
+					const difficulty2014Panel = document.getElementById('difficulty-2014-panel');
+
+					function updateRulesetUI() {
+						const ruleset = document.querySelector('input[name="ruleset"]:checked').value;
+						if (ruleset === '2024') {
+							difficulty2024Panel?.style.setProperty('display', 'block');
+							difficulty2014Panel?.style.setProperty('display', 'none');
+						} else {
+							difficulty2024Panel?.style.setProperty('display', 'none');
+							difficulty2014Panel?.style.setProperty('display', 'block');
+						}
+					}
+
+					rulesetRadios.forEach(radio => {
+						radio.addEventListener('change', updateRulesetUI);
+					});
+
+					// Party mode toggle
+					const partyModeRadios = document.querySelectorAll('input[name="party_mode"]');
+					const partySamePanel = document.getElementById('party-same-panel');
+					const partyDifferentPanel = document.getElementById('party-different-panel');
+
+					function updatePartyModeUI() {
+						const mode = document.querySelector('input[name="party_mode"]:checked').value;
+						if (mode === 'same') {
+							partySamePanel?.style.setProperty('display', 'block');
+							partyDifferentPanel?.style.setProperty('display', 'none');
+						} else {
+							partySamePanel?.style.setProperty('display', 'none');
+							partyDifferentPanel?.style.setProperty('display', 'block');
+						}
+					}
+
+					partyModeRadios.forEach(radio => {
+						radio.addEventListener('change', updatePartyModeUI);
+					});
+
+					// Character management for different levels
+					const addCharBtn = document.getElementById('add-character');
+					const removeCharBtn = document.getElementById('remove-character');
+					const charContainer = document.getElementById('character-levels-container');
+
+					if (addCharBtn && charContainer) {
+						addCharBtn.addEventListener('click', function() {
+							const count = charContainer.children.length;
+							if (count < 8) {
+								const div = document.createElement('div');
+								div.className = 'character-input-group';
+								div.innerHTML = `
+									<label>Personaggio ${count + 1}</label>
+									<input type="number" name="character_levels" value="3" min="1" max="20" required/>
+								`;
+								charContainer.appendChild(div);
+								updateCharacterControls();
+							}
+						});
+
+						if (removeCharBtn) {
+							removeCharBtn.addEventListener('click', function() {
+								const count = charContainer.children.length;
+								if (count > 1) {
+									charContainer.removeChild(charContainer.lastElementChild);
+									updateCharacterControls();
+								}
+							});
+						}
+
+						function updateCharacterControls() {
+							const count = charContainer.children.length;
+							if (removeCharBtn) {
+								removeCharBtn.disabled = count <= 1;
+							}
+							if (addCharBtn) {
+								addCharBtn.disabled = count >= 8;
+							}
+						}
+
+						updateCharacterControls();
+					}
+				}
+			});
+		</script>
+	</body>
+	</html>
+}
+
+templ footer() {
+	<footer style="background: var(--notion-bg); border-top: 1px solid var(--notion-border); margin-top: auto; padding: 1.5rem 0;">
+		<div class="container" style="max-width: 1024px; text-align: center;">
+			<p style="font-size: 12px; color: var(--notion-text-light); line-height: 1.4; margin: 0;">
+				🐉 Creato da <a href="https://duedraghialmicrofono.com" target="_blank" rel="noopener noreferrer" style="color: var(--notion-link);">Due Draghi al Microfono</a> | 
+				<a href="https://www.dndbeyond.com/srd" target="_blank" rel="noopener noreferrer" style="color: var(--notion-link);">D&D 5 SRD</a>
+			</p>
+		</div>
+	</footer>
+}
