@@ -25,6 +25,9 @@ jobs:
       - name: Generate templates
         run: templ generate
 
+      - name: Download dependencies
+        run: go mod download
+
       - name: Check formatting
         run: |
           if [ -n "$(gofmt -l .)" ]; then
