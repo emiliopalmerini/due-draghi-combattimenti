@@ -12,8 +12,8 @@ import (
 
 	"github.com/go-chi/chi/v5/middleware"
 
-	"github.com/emiliopalmerini/due-draghi-emporium/internal/application/encounter"
-	"github.com/emiliopalmerini/due-draghi-emporium/internal/infrastructure/web/encounters/templates"
+	"github.com/emiliopalmerini/due-draghi-combattimenti/internal/application/encounter"
+	"github.com/emiliopalmerini/due-draghi-combattimenti/internal/infrastructure/web/templates"
 )
 
 // EncounterHandler handles HTTP requests for encounter-related operations

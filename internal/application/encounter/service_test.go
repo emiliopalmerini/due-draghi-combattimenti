@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/emiliopalmerini/due-draghi-emporium/internal/domain/encounter"
-	"github.com/emiliopalmerini/due-draghi-emporium/internal/infrastructure/persistence/memory"
+	"github.com/emiliopalmerini/due-draghi-combattimenti/internal/domain/encounter"
+	"github.com/emiliopalmerini/due-draghi-combattimenti/internal/infrastructure/persistence/memory"
 )
 
 func TestService_CalculateXP2024(t *testing.T) {

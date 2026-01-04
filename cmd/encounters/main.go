@@ -16,11 +16,11 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 
-	"github.com/emiliopalmerini/due-draghi-emporium/internal/application/encounter"
-	"github.com/emiliopalmerini/due-draghi-emporium/internal/infrastructure/config"
-	"github.com/emiliopalmerini/due-draghi-emporium/internal/infrastructure/persistence/memory"
-	"github.com/emiliopalmerini/due-draghi-emporium/internal/infrastructure/web/encounters/templates"
-	"github.com/emiliopalmerini/due-draghi-emporium/internal/infrastructure/web/handlers"
+	"github.com/emiliopalmerini/due-draghi-combattimenti/internal/application/encounter"
+	"github.com/emiliopalmerini/due-draghi-combattimenti/internal/infrastructure/config"
+	"github.com/emiliopalmerini/due-draghi-combattimenti/internal/infrastructure/persistence/memory"
+	"github.com/emiliopalmerini/due-draghi-combattimenti/internal/infrastructure/web/handlers"
+	"github.com/emiliopalmerini/due-draghi-combattimenti/internal/infrastructure/web/templates"
 )
 
 type ctxKey string
