@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/emiliopalmerini/due-draghi-emporium/internal/domain/encounter"
+	"github.com/emiliopalmerini/due-draghi-combattimenti/internal/domain/encounter"
 )
 
 // Service provides use cases for encounter management

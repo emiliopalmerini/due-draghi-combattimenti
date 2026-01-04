@@ -3,7 +3,7 @@ package memory
 import (
 	"fmt"
 
-	"github.com/emiliopalmerini/due-draghi-emporium/internal/domain/encounter"
+	"github.com/emiliopalmerini/due-draghi-combattimenti/internal/domain/encounter"
 )
 
 // EncounterRepository implements the encounter.Repository interface using in-memory data
