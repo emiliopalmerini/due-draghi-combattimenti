@@ -99,8 +99,8 @@ func (app *App) setupRouter() {
 	r.Get("/health", app.healthHandler)
 	r.Get("/ready", app.readinessHandler)
 
-	// Serve static files
-	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("internal/infrastructure/static"))))
+	// Serve static files with no-cache headers
+	r.Handle("/static/*", noCacheMiddleware(http.StripPrefix("/static/", http.FileServer(http.Dir("internal/infrastructure/static")))))
 
 	// Application routes
 	r.Route("/", func(r chi.Router) {
@@ -125,6 +125,16 @@ func (app *App) indexHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
+}
+
+// noCacheMiddleware sets headers to prevent browser caching
+func noCacheMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+		w.Header().Set("Pragma", "no-cache")
+		w.Header().Set("Expires", "0")
+		next.ServeHTTP(w, r)
+	})
 }
 
 // htmxMiddleware adds HTMX-specific functionality to requests
