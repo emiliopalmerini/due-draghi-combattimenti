@@ -1,9 +1,41 @@
 package templates
 
 import (
+	"fmt"
 	"strconv"
 	"github.com/emiliopalmerini/due-draghi-combattimenti/internal/domain/monster"
 )
+
+func formatMod(mod int) string {
+	if mod >= 0 {
+		return fmt.Sprintf("+%d", mod)
+	}
+	return strconv.Itoa(mod)
+}
+
+func formatSavingThrows(st monster.SavingThrows) string {
+	parts := []struct {
+		label string
+		val   string
+	}{
+		{"FOR", st.Strength},
+		{"DES", st.Dexterity},
+		{"COS", st.Constitution},
+		{"INT", st.Intelligence},
+		{"SAG", st.Wisdom},
+		{"CAR", st.Charisma},
+	}
+	result := ""
+	for _, p := range parts {
+		if p.val != "" {
+			if result != "" {
+				result += ", "
+			}
+			result += p.label + " " + p.val
+		}
+	}
+	return result
+}
 
 templ MonsterList(monsters []monster.Monster, maxXP int) {
 	<div class="monster-list">
@@ -41,6 +73,148 @@ templ MonsterList(monsters []monster.Monster, maxXP int) {
 									>
 										+
 									</button>
+								</td>
+							</tr>
+							<tr class="monster-detail-row">
+								<td colspan="7">
+									<div class="monster-detail-panel">
+										<div class="monster-detail-header">
+											<strong>{ m.Name }</strong>
+											<span>
+												{ m.Size }
+												if m.Subtype != "" {
+													{ m.Type } ({ m.Subtype })
+												} else {
+													{ m.Type }
+												}
+												if m.Alignment != "" {
+													, { m.Alignment }
+												}
+											</span>
+										</div>
+										<div class="monster-detail-stats">
+											<div class="monster-detail-stat">
+												<span class="monster-detail-stat-label">CA</span>
+												<span>{ m.AC }</span>
+											</div>
+											<div class="monster-detail-stat">
+												<span class="monster-detail-stat-label">PF</span>
+												<span>{ m.HP }</span>
+											</div>
+											<div class="monster-detail-stat">
+												<span class="monster-detail-stat-label">Velocità</span>
+												<span>{ m.Speed }</span>
+											</div>
+											if m.Initiative != "" {
+												<div class="monster-detail-stat">
+													<span class="monster-detail-stat-label">Iniziativa</span>
+													<span>{ m.Initiative }</span>
+												</div>
+											}
+											<div class="monster-detail-stat">
+												<span class="monster-detail-stat-label">GS</span>
+												<span>{ m.CRDetail }</span>
+											</div>
+										</div>
+										<div class="monster-ability-grid">
+											<div class="monster-ability">
+												<span class="monster-ability-label">FOR</span>
+												<span class="monster-ability-score">{ strconv.Itoa(m.AbilityScores.Strength) }</span>
+												<span class="monster-ability-mod">{ formatMod(m.AbilityMods.Strength) }</span>
+											</div>
+											<div class="monster-ability">
+												<span class="monster-ability-label">DES</span>
+												<span class="monster-ability-score">{ strconv.Itoa(m.AbilityScores.Dexterity) }</span>
+												<span class="monster-ability-mod">{ formatMod(m.AbilityMods.Dexterity) }</span>
+											</div>
+											<div class="monster-ability">
+												<span class="monster-ability-label">COS</span>
+												<span class="monster-ability-score">{ strconv.Itoa(m.AbilityScores.Constitution) }</span>
+												<span class="monster-ability-mod">{ formatMod(m.AbilityMods.Constitution) }</span>
+											</div>
+											<div class="monster-ability">
+												<span class="monster-ability-label">INT</span>
+												<span class="monster-ability-score">{ strconv.Itoa(m.AbilityScores.Intelligence) }</span>
+												<span class="monster-ability-mod">{ formatMod(m.AbilityMods.Intelligence) }</span>
+											</div>
+											<div class="monster-ability">
+												<span class="monster-ability-label">SAG</span>
+												<span class="monster-ability-score">{ strconv.Itoa(m.AbilityScores.Wisdom) }</span>
+												<span class="monster-ability-mod">{ formatMod(m.AbilityMods.Wisdom) }</span>
+											</div>
+											<div class="monster-ability">
+												<span class="monster-ability-label">CAR</span>
+												<span class="monster-ability-score">{ strconv.Itoa(m.AbilityScores.Charisma) }</span>
+												<span class="monster-ability-mod">{ formatMod(m.AbilityMods.Charisma) }</span>
+											</div>
+										</div>
+										<div class="monster-detail-properties">
+											if formatSavingThrows(m.SavingThrows) != "" {
+												<p><strong>Tiri Salvezza:</strong> { formatSavingThrows(m.SavingThrows) }</p>
+											}
+											if m.Skills != "" {
+												<p><strong>Abilità:</strong> { m.Skills }</p>
+											}
+											if m.Resistances != "" {
+												<p><strong>Resistenze:</strong> { m.Resistances }</p>
+											}
+											if m.DamageImmunities != "" {
+												<p><strong>Immunità ai Danni:</strong> { m.DamageImmunities }</p>
+											}
+											if m.ConditionImmunities != "" {
+												<p><strong>Immunità alle Condizioni:</strong> { m.ConditionImmunities }</p>
+											}
+											if m.Senses != "" {
+												<p><strong>Sensi:</strong> { m.Senses }</p>
+											}
+											if m.Languages != "" {
+												<p><strong>Linguaggi:</strong> { m.Languages }</p>
+											}
+											if m.Equipment != "" {
+												<p><strong>Equipaggiamento:</strong> { m.Equipment }</p>
+											}
+										</div>
+										if len(m.Traits) > 0 {
+											<div class="monster-detail-section">
+												<h5>Tratti</h5>
+												for _, t := range m.Traits {
+													<p><strong>{ t.Name }.</strong> { t.Description }</p>
+												}
+											</div>
+										}
+										if len(m.Actions) > 0 {
+											<div class="monster-detail-section">
+												<h5>Azioni</h5>
+												for _, a := range m.Actions {
+													<p><strong>{ a.Name }.</strong> { a.Description }</p>
+												}
+											</div>
+										}
+										if len(m.BonusActions) > 0 {
+											<div class="monster-detail-section">
+												<h5>Azioni Bonus</h5>
+												for _, a := range m.BonusActions {
+													<p><strong>{ a.Name }.</strong> { a.Description }</p>
+												}
+											</div>
+										}
+										if len(m.Reactions) > 0 {
+											<div class="monster-detail-section">
+												<h5>Reazioni</h5>
+												for _, r := range m.Reactions {
+													<p><strong>{ r.Name }.</strong> { r.Description }</p>
+												}
+											</div>
+										}
+										if len(m.LegendaryActions) > 0 {
+											<div class="monster-detail-section">
+												<h5>Azioni Leggendarie</h5>
+												for _, la := range m.LegendaryActions {
+													<p><strong>{ la.Name }.</strong> { la.Description }</p>
+												}
+											</div>
+										}
+									</div>
 								</td>
 							</tr>
 						}

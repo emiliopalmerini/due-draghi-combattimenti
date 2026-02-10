@@ -79,6 +79,92 @@ func TestSearch_FiltersByNameAndXP(t *testing.T) {
 	}
 }
 
+func TestNewMonsterRepository_ParsesDetailFields(t *testing.T) {
+	repo := NewMonsterRepository()
+	monsters := repo.Search("aboleth", 1_000_000)
+	if len(monsters) != 1 {
+		t.Fatalf("expected 1 aboleth, got %d", len(monsters))
+	}
+	m := monsters[0]
+
+	// Alignment
+	if m.Alignment == "" {
+		t.Error("expected aboleth to have alignment")
+	}
+
+	// Speed
+	if m.Speed == "" {
+		t.Error("expected aboleth to have speed")
+	}
+
+	// Initiative
+	if m.Initiative == "" {
+		t.Error("expected aboleth to have initiative")
+	}
+
+	// Ability scores
+	if m.AbilityScores.Strength != 21 {
+		t.Errorf("expected aboleth STR=21, got %d", m.AbilityScores.Strength)
+	}
+	if m.AbilityScores.Intelligence != 18 {
+		t.Errorf("expected aboleth INT=18, got %d", m.AbilityScores.Intelligence)
+	}
+
+	// Ability mods
+	if m.AbilityMods.Strength != 5 {
+		t.Errorf("expected aboleth STR mod=5, got %d", m.AbilityMods.Strength)
+	}
+	if m.AbilityMods.Dexterity != -1 {
+		t.Errorf("expected aboleth DEX mod=-1, got %d", m.AbilityMods.Dexterity)
+	}
+
+	// Saving throws
+	if m.SavingThrows.Intelligence != "+8" {
+		t.Errorf("expected aboleth INT save=+8, got %s", m.SavingThrows.Intelligence)
+	}
+
+	// Traits
+	if len(m.Traits) == 0 {
+		t.Fatal("expected aboleth to have traits")
+	}
+	if m.Traits[0].Name != "Anfibio" {
+		t.Errorf("expected first trait 'Anfibio', got %q", m.Traits[0].Name)
+	}
+
+	// Actions
+	if len(m.Actions) == 0 {
+		t.Fatal("expected aboleth to have actions")
+	}
+	if m.Actions[0].Name != "Multiattacco" {
+		t.Errorf("expected first action 'Multiattacco', got %q", m.Actions[0].Name)
+	}
+
+	// Legendary actions
+	if len(m.LegendaryActions) == 0 {
+		t.Fatal("expected aboleth to have legendary actions")
+	}
+
+	// CRDetail
+	if m.CRDetail == "" {
+		t.Error("expected aboleth to have cr_detail")
+	}
+
+	// Skills
+	if m.Skills == "" {
+		t.Error("expected aboleth to have skills")
+	}
+
+	// Senses
+	if m.Senses == "" {
+		t.Error("expected aboleth to have senses")
+	}
+
+	// Languages
+	if m.Languages == "" {
+		t.Error("expected aboleth to have languages")
+	}
+}
+
 func TestSearch_EmptyQuery_ReturnsAllUpToMaxXP(t *testing.T) {
 	repo := NewMonsterRepository()
 	all := repo.Search("", 1_000_000)

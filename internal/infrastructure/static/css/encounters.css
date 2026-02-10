@@ -1263,6 +1263,147 @@ select.field {
   font-size: var(--font-size-sm) !important;
 }
 
+/* Monster row expand/collapse */
+.monster-row {
+  cursor: pointer;
+}
+
+.monster-row.expanded {
+  background: var(--gray-50);
+  font-weight: var(--font-weight-bold);
+}
+
+/* Monster detail row - hidden by default */
+.monster-detail-row {
+  display: none;
+}
+
+.monster-detail-row.expanded {
+  display: table-row;
+  animation: fadeIn 0.25s ease;
+}
+
+.monster-detail-row td {
+  padding: 0 !important;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.monster-detail-panel {
+  padding: 1rem 1.5rem;
+  background: var(--gray-50);
+  border-left: 3px solid var(--celestial-blue);
+}
+
+.monster-detail-header {
+  margin-bottom: 0.75rem;
+}
+
+.monster-detail-header strong {
+  font-size: var(--font-size-base);
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.monster-detail-header span {
+  font-size: var(--font-size-sm);
+  color: var(--notion-text-light);
+}
+
+/* Core stats row */
+.monster-detail-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.monster-detail-stat {
+  font-size: var(--font-size-sm);
+}
+
+.monster-detail-stat-label {
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--notion-text-light);
+  margin-right: 0.25rem;
+}
+
+/* Ability scores grid */
+.monster-ability-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.monster-ability {
+  text-align: center;
+  padding: 0.375rem;
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+}
+
+.monster-ability-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--notion-text-light);
+  margin-bottom: 0.125rem;
+}
+
+.monster-ability-score {
+  display: block;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+}
+
+.monster-ability-mod {
+  display: block;
+  font-size: var(--font-size-sm);
+  color: var(--notion-text-light);
+}
+
+/* Properties section */
+.monster-detail-properties {
+  margin-bottom: 0.75rem;
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+}
+
+.monster-detail-properties p {
+  margin: 0.25rem 0;
+}
+
+/* Action sections */
+.monster-detail-section {
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--gray-200);
+}
+
+.monster-detail-section h5 {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--bittersweet-shimmer);
+  margin: 0 0 0.5rem 0;
+}
+
+.monster-detail-section p {
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+  margin: 0.375rem 0;
+}
+
 @media (max-width: 768px) {
   .monster-browser {
     padding: 1rem;
@@ -1281,5 +1422,18 @@ select.field {
   .monster-table th,
   .monster-table td {
     padding: 0.375rem;
+  }
+
+  .monster-ability-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .monster-detail-panel {
+    padding: 0.75rem 1rem;
+  }
+
+  .monster-detail-stats {
+    flex-direction: column;
+    gap: 0.375rem;
   }
 }

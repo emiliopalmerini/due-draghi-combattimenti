@@ -143,6 +143,32 @@ function updateSelectedMonstersUI() {
     ).join('');
 }
 
+// Monster row accordion expand/collapse
+document.addEventListener('click', function(evt) {
+    // Don't toggle when clicking the + button
+    if (evt.target.closest('.monster-add-btn')) return;
+
+    var row = evt.target.closest('.monster-row');
+    if (!row) return;
+
+    var detailRow = row.nextElementSibling;
+    if (!detailRow || !detailRow.classList.contains('monster-detail-row')) return;
+
+    var isExpanded = detailRow.classList.contains('expanded');
+
+    // Collapse all expanded rows (accordion behavior)
+    document.querySelectorAll('.monster-detail-row.expanded').forEach(function(el) {
+        el.classList.remove('expanded');
+        el.previousElementSibling.classList.remove('expanded');
+    });
+
+    // Toggle clicked row (if it wasn't already expanded)
+    if (!isExpanded) {
+        detailRow.classList.add('expanded');
+        row.classList.add('expanded');
+    }
+});
+
 // Reset selected monsters when a new calculation is made
 document.addEventListener('htmx:afterSwap', function(evt) {
     if (evt.detail.target && evt.detail.target.id === 'result-container') {
