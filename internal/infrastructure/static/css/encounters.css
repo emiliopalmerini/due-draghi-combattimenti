@@ -81,6 +81,16 @@
   box-shadow: none;
 }
 
+select.field {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23222' stroke-width='2' fill='none' stroke-linecap='square'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+  cursor: pointer;
+}
+
 /* Radio button styling */
 .radio-button {
   display: flex;
@@ -1041,6 +1051,74 @@
   .party-member-controls {
     justify-content: center;
   }
+}
+
+/* HTMX swap/settle transitions */
+.htmx-swapping {
+  opacity: 0;
+  transition: opacity 0.2s ease-out;
+}
+
+.htmx-settling {
+  opacity: 1;
+  transition: opacity 0.3s ease-in;
+}
+
+/* Result card layout */
+.result-header {
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: 2px solid var(--border-color);
+}
+
+.result-header h2 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-black);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  margin: 0;
+}
+
+.xp-value {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-black);
+  display: block;
+  margin-top: var(--space-2);
+  letter-spacing: var(--letter-spacing-tighter);
+}
+
+.result-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+@media (max-width: 640px) {
+  .result-info-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+}
+
+.result-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.result-info-label {
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wider);
+  color: var(--text-primary);
+  opacity: 0.5;
+}
+
+.result-info-value {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
 }
 
 /* Monster Browser */
