@@ -1,5 +1,16 @@
 // Encounters Calculator JavaScript
 
+// Theme toggle
+function initThemeToggle() {
+    var btn = document.getElementById('theme-toggle');
+    if (!btn) return;
+    btn.addEventListener('click', function() {
+        var d = document.documentElement;
+        var isDark = d.classList.toggle('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    });
+}
+
 // Patreon banner dismiss
 function initPatreonBanner() {
     var banner = document.getElementById('patreon-banner');
@@ -19,6 +30,7 @@ function initPatreonBanner() {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    initThemeToggle();
     initPatreonBanner();
     // Configure HTMX
     htmx.config.requestClass = 'loading';
