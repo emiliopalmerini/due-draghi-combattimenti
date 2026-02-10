@@ -71,7 +71,9 @@ templ Result(result *encounter.CalculateXPResponse) {
 		</div>
 
 		<!-- Monster Browser -->
-		@MonsterBrowser(result.TotalXP)
+		if result.Ruleset == "2024" {
+			@MonsterBrowser(result.TotalXP)
+		}
 	</div>
 
 	<script>
