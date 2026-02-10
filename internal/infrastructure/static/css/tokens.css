@@ -50,6 +50,13 @@
   --notion-radius: 3px;
   --notion-link: #2493d0;
 
+  /* Due Draghi Brand Colors */
+  --celestial-blue: #2493D0;
+  --bittersweet-shimmer: #CF4C56;
+  --reseda-green: #68B54A;
+  --earth-yellow: #E9B44C;
+  --butterscotch: #D4943A;
+
   /* Semantic mappings */
   --text-primary: #000000;
   --text-secondary: #000000;
