@@ -35,95 +35,10 @@ templ Result(result *encounter.CalculateXPResponse) {
 			</div>
 		</div>
 
-
-
-		<!-- Tips and Usage -->
-		<div class="result-tips">
-			<h3>💡 Suggerimenti per l'Uso</h3>
-			<ul>
-				<li>Usate questo budget XP per selezionare mostri dal Manuale dei Mostri</li>
-				if result.Ruleset != "2014" {
-					<li>Potete distribuire l'XP su più mostri per variare l'incontro</li>
-				}
-				<li>Considerate gli oggetti magici e gli effetti speciali quando selezionate i nemici</li>
-				if result.Ruleset == "2014" {
-					<li>Il moltiplicatore dei mostri è già stato applicato</li>
-				}
-				if result.PartySize == 1 {
-					<li>Un solo personaggio contro un incontro è più difficile. Considerate di scalare verso il basso</li>
-				}
-				if result.PartySize > 5 {
-					<li>Una party numerosa potrebbe trovare gli incontri più facili. Aggiungete mostri se necessario</li>
-				}
-			</ul>
-		</div>
-
-		<!-- Copy Button -->
-		<div style="margin-top: 2rem; display: flex; gap: 0.5rem;">
-			<button
-				type="button"
-				class="btn btn-secondary"
-				onclick="copyResult()"
-				title="Copia i risultati"
-			>
-				📋 Copia Risultati
-			</button>
-		</div>
-
 		<!-- Monster Browser -->
 		if result.Ruleset == "2024" {
 			@MonsterBrowser(result.TotalXP)
 		}
 	</div>
 
-	<script>
-		function copyResult() {
-			const card = document.querySelector('.result-card');
-			const xp = card.querySelector('.xp-value').textContent;
-			const items = card.querySelectorAll('.result-info-item');
-			
-			let regole = '';
-			let personaggi = '';
-			let livelli = '';
-			
-			items.forEach(item => {
-				const label = item.querySelector('.result-info-label').textContent;
-				const value = item.querySelector('.result-info-value').textContent.trim();
-				
-				if (label === 'Regole') {
-					regole = value;
-				} else if (label === 'Personaggi') {
-					personaggi = value.split(' ')[0]; // Extract just the number
-				} else if (label === 'Livelli') {
-					livelli = value;
-				}
-			});
-			
-			const text = `Budget XP: ${xp}
-Regole: ${regole}
-Personaggi: ${personaggi}
-Livelli: ${livelli}`;
-
-			if (navigator.clipboard) {
-				navigator.clipboard.writeText(text).then(() => {
-					const btn = event.target;
-					const originalText = btn.textContent;
-					btn.textContent = '✓ Copiato!';
-					setTimeout(() => {
-						btn.textContent = originalText;
-					}, 2000);
-				});
-			}
-		}
-
-
-	</script>
-}
-
-func makeIntSliceStr(arr []int) []string {
-	result := make([]string, len(arr))
-	for i, v := range arr {
-		result[i] = strconv.Itoa(v)
-	}
-	return result
 }
