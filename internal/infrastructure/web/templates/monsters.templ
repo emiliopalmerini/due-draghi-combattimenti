@@ -1,0 +1,86 @@
+package templates
+
+import (
+	"strconv"
+	"github.com/emiliopalmerini/due-draghi-combattimenti/internal/domain/monster"
+)
+
+templ MonsterList(monsters []monster.Monster, maxXP int) {
+	<div class="monster-list">
+		if len(monsters) == 0 {
+			<p class="monster-empty">Nessun mostro trovato per questo budget XP.</p>
+		} else {
+			<p class="monster-count">{ strconv.Itoa(len(monsters)) } mostri disponibili</p>
+			<div class="monster-table-wrapper">
+				<table class="monster-table">
+					<thead>
+						<tr>
+							<th>Nome</th>
+							<th>Tipo</th>
+							<th>GS</th>
+							<th>PE</th>
+							<th>CA</th>
+							<th>PF</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						for _, m := range monsters {
+							<tr class="monster-row" data-xp={ strconv.Itoa(m.XP) } data-name={ m.Name } data-id={ m.ID }>
+								<td class="monster-name">{ m.Name }</td>
+								<td>{ m.Type }</td>
+								<td>{ m.CR }</td>
+								<td>{ strconv.Itoa(m.XP) }</td>
+								<td>{ m.AC }</td>
+								<td>{ m.HP }</td>
+								<td>
+									<button
+										type="button"
+										class="btn btn-secondary btn-small monster-add-btn"
+										onclick="addMonster(this)"
+									>
+										+
+									</button>
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+		}
+	</div>
+}
+
+templ MonsterBrowser(maxXP int) {
+	<div class="monster-browser">
+		<h3>Seleziona Mostri</h3>
+		<div class="monster-search-bar">
+			<input
+				type="text"
+				name="q"
+				placeholder="Cerca un mostro..."
+				class="field monster-search-input"
+				hx-get="/api/monsters"
+				hx-trigger="input changed delay:300ms, search"
+				hx-target="#monster-results"
+				hx-include="[name='max_xp']"
+			/>
+			<input type="hidden" name="max_xp" value={ strconv.Itoa(maxXP) }/>
+		</div>
+		<div class="monster-selected">
+			<h4>Mostri Selezionati: <span id="selected-count">0</span></h4>
+			<div id="selected-monsters-list"></div>
+			<div class="monster-xp-tracker">
+				<span>PE Usati: <strong id="xp-used">0</strong> / <strong>{ strconv.Itoa(maxXP) }</strong></span>
+				<span id="xp-remaining" class="xp-remaining">Rimanenti: <strong>{ strconv.Itoa(maxXP) }</strong></span>
+			</div>
+		</div>
+		<div id="monster-results"
+			hx-get={ "/api/monsters?max_xp=" + strconv.Itoa(maxXP) }
+			hx-trigger="load"
+			hx-swap="innerHTML"
+		>
+			<p>Caricamento mostri...</p>
+		</div>
+	</div>
+}

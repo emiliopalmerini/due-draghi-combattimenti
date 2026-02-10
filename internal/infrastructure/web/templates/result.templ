@@ -70,41 +70,11 @@ templ Result(result *encounter.CalculateXPResponse) {
 			</button>
 		</div>
 
-		<!-- Find Monsters Section -->
-		<div style="margin-top: 1.5rem; padding: 1.5rem; background: var(--notion-light-bg); border-left: 4px solid var(--notion-link); border-radius: 4px;">
-			<p style="margin: 0 0 1rem 0; font-size: 0.9rem; color: var(--notion-text-secondary);">
-				🔍 La ricerca ti porterà a <strong>quintaedizione.online</strong> dove potrai trovare i mostri corrispondenti
-			</p>
-			<form style="display: flex; gap: 0.5rem;" onsubmit="searchMonstersRedirect(event)">
-				<input
-					type="text"
-					id="monster-search"
-					name="q"
-					placeholder="Cerca un mostro..."
-					style="flex: 1; padding: 0.75rem; border: 1px solid var(--notion-border); border-radius: 4px; background: var(--notion-bg); color: var(--notion-text); font-family: inherit;"
-					required
-				/>
-				<button
-					type="submit"
-					class="btn btn-secondary"
-					style="white-space: nowrap;"
-				>
-					🔍 Cerca
-				</button>
-			</form>
-		</div>
+		<!-- Monster Browser -->
+		@MonsterBrowser(result.TotalXP)
 	</div>
 
 	<script>
-		function searchMonstersRedirect(event) {
-			event.preventDefault();
-			const query = document.getElementById('monster-search').value.trim();
-			if (query) {
-				const url = `https://quintaedizione.online/mostri?q=${encodeURIComponent(query)}`;
-				window.open(url, '_blank', 'noopener,noreferrer');
-			}
-		}
-
 		function copyResult() {
 			const card = document.querySelector('.result-card');
 			const xp = card.querySelector('.xp-value').textContent;

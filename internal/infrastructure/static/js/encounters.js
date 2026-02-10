@@ -97,3 +97,55 @@ window.encountersUtils = {
 
 // Make showNotification available globally
 window.showNotification = window.encountersUtils.showNotification;
+
+// Monster selection tracking
+window.selectedMonsters = [];
+
+function addMonster(btn) {
+    const row = btn.closest('.monster-row');
+    const name = row.dataset.name;
+    const xp = parseInt(row.dataset.xp, 10);
+    const id = row.dataset.id;
+
+    window.selectedMonsters.push({ id, name, xp });
+    updateSelectedMonstersUI();
+}
+
+function removeMonster(index) {
+    window.selectedMonsters.splice(index, 1);
+    updateSelectedMonstersUI();
+}
+
+function updateSelectedMonstersUI() {
+    const list = document.getElementById('selected-monsters-list');
+    const countEl = document.getElementById('selected-count');
+    const usedEl = document.getElementById('xp-used');
+    const remainingEl = document.getElementById('xp-remaining');
+
+    if (!list) return;
+
+    const totalUsed = window.selectedMonsters.reduce((sum, m) => sum + m.xp, 0);
+    const maxXPInput = document.querySelector('input[name="max_xp"]');
+    const budget = maxXPInput ? parseInt(maxXPInput.value, 10) : 0;
+
+    countEl.textContent = window.selectedMonsters.length;
+    usedEl.textContent = window.encountersUtils.formatXP(totalUsed);
+
+    const remaining = budget - totalUsed;
+    remainingEl.innerHTML = 'Rimanenti: <strong>' + window.encountersUtils.formatXP(remaining) + '</strong>';
+    remainingEl.classList.toggle('over-budget', remaining < 0);
+
+    list.innerHTML = window.selectedMonsters.map((m, i) =>
+        '<div class="selected-monster-item">' +
+            '<span>' + m.name + ' (PE ' + window.encountersUtils.formatXP(m.xp) + ')</span>' +
+            '<button type="button" onclick="removeMonster(' + i + ')">✕</button>' +
+        '</div>'
+    ).join('');
+}
+
+// Reset selected monsters when a new calculation is made
+document.addEventListener('htmx:afterSwap', function(evt) {
+    if (evt.detail.target && evt.detail.target.id === 'result-container') {
+        window.selectedMonsters = [];
+    }
+});

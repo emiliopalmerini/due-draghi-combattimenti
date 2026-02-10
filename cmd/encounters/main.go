@@ -17,6 +17,7 @@ import (
 	"github.com/go-chi/cors"
 
 	"github.com/emiliopalmerini/due-draghi-combattimenti/internal/application/encounter"
+	monsterApp "github.com/emiliopalmerini/due-draghi-combattimenti/internal/application/monster"
 	"github.com/emiliopalmerini/due-draghi-combattimenti/internal/infrastructure/config"
 	"github.com/emiliopalmerini/due-draghi-combattimenti/internal/infrastructure/persistence/memory"
 	"github.com/emiliopalmerini/due-draghi-combattimenti/internal/infrastructure/web/handlers"
@@ -32,26 +33,31 @@ type App struct {
 	logger           *slog.Logger
 	encounterService *encounter.Service
 	encounterHandler *handlers.EncounterHandler
+	monsterHandler   *handlers.MonsterHandler
 	queryHandler     *encounter.QueryHandler
 }
 
 // NewApp creates a new application instance with all dependencies
 func NewApp(cfg *config.Config, logger *slog.Logger) (*App, error) {
-	// Initialize repository
+	// Initialize repositories
 	repo := memory.NewEncounterRepository()
+	monsterRepo := memory.NewMonsterRepository()
 
 	// Initialize application services
 	encounterService := encounter.NewService(logger, repo)
 	queryHandler := encounter.NewQueryHandler(logger, repo)
+	monsterService := monsterApp.NewService(monsterRepo)
 
 	// Initialize HTTP handlers
 	encounterHandler := handlers.NewEncounterHandler(encounterService, queryHandler, logger)
+	monsterHandler := handlers.NewMonsterHandler(monsterService, logger)
 
 	app := &App{
 		config:           cfg,
 		logger:           logger,
 		encounterService: encounterService,
 		encounterHandler: encounterHandler,
+		monsterHandler:   monsterHandler,
 		queryHandler:     queryHandler,
 	}
 
@@ -102,6 +108,7 @@ func (app *App) setupRouter() {
 		r.Post("/calculate", app.encounterHandler.CalculateHandler)
 		r.Get("/party-input", app.encounterHandler.PartyInputHandler)
 		r.Get("/api/difficulties", app.encounterHandler.GetDifficultiesHandler)
+		r.Get("/api/monsters", app.monsterHandler.SearchHandler)
 	})
 
 	app.router = r
