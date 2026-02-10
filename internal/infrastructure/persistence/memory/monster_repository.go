@@ -64,16 +64,19 @@ type jsonMonster struct {
 	CR                  string                 `json:"cr"`
 	CRDetail            string                 `json:"cr_detail"`
 	Equipment           string                 `json:"equipment"`
-	Traits              []jsonNamedDescription  `json:"traits"`
-	Actions             []jsonNamedDescription  `json:"actions"`
-	BonusActions        []jsonNamedDescription  `json:"bonus_actions"`
-	Reactions           []jsonNamedDescription  `json:"reactions"`
-	LegendaryActions    []jsonNamedDescription  `json:"legendary_actions"`
+	Traits              []jsonNamedDescription `json:"traits"`
+	Actions             []jsonNamedDescription `json:"actions"`
+	BonusActions        []jsonNamedDescription `json:"bonus_actions"`
+	Reactions           []jsonNamedDescription `json:"reactions"`
+	LegendaryActions    []jsonNamedDescription `json:"legendary_actions"`
 }
 
 // MonsterRepository provides in-memory access to monster data.
 type MonsterRepository struct {
-	monsters []monster.Monster
+	monsters       []monster.Monster
+	availableTypes []string
+	availableSizes []string
+	availableCRs   []string
 }
 
 // NewMonsterRepository loads monsters from embedded JSON.
@@ -124,11 +127,18 @@ func NewMonsterRepository() *MonsterRepository {
 		}
 	}
 
+	// Normalize sizes
+	for i := range monsters {
+		monsters[i].Size = normalizeSize(monsters[i].Size)
+	}
+
 	sort.Slice(monsters, func(i, j int) bool {
 		return monsters[i].XP < monsters[j].XP
 	})
 
-	return &MonsterRepository{monsters: monsters}
+	repo := &MonsterRepository{monsters: monsters}
+	repo.buildFacets()
+	return repo
 }
 
 func convertNamedDescriptions(src []jsonNamedDescription) []monster.NamedDescription {
@@ -180,4 +190,123 @@ func (r *MonsterRepository) Search(query string, maxXP int) []monster.Monster {
 		}
 	}
 	return result
+}
+
+// normalizeSize maps Italian masculine/compound size variants to canonical feminine forms.
+func normalizeSize(s string) string {
+	// Handle compound sizes: take the first word as the base size
+	if idx := strings.IndexAny(s, " "); idx != -1 {
+		s = s[:idx]
+	}
+
+	switch s {
+	case "Minuscolo":
+		return "Minuscola"
+	case "Piccolo":
+		return "Piccola"
+	case "Medio":
+		return "Media"
+	case "Mastodontico":
+		return "Mastodontica"
+	default:
+		return s
+	}
+}
+
+// crValue converts a CR string to a numeric value for comparison.
+func crValue(cr string) float64 {
+	switch cr {
+	case "1/8":
+		return 0.125
+	case "1/4":
+		return 0.25
+	case "1/2":
+		return 0.5
+	}
+	v, err := strconv.ParseFloat(cr, 64)
+	if err != nil {
+		return 0
+	}
+	return v
+}
+
+func (r *MonsterRepository) buildFacets() {
+	typeSet := make(map[string]bool)
+	sizeSet := make(map[string]bool)
+	crSet := make(map[string]bool)
+
+	for _, m := range r.monsters {
+		typeSet[m.Type] = true
+		sizeSet[m.Size] = true
+		crSet[m.CR] = true
+	}
+
+	r.availableTypes = sortedKeys(typeSet)
+	r.availableSizes = sortedKeys(sizeSet)
+
+	// Sort CRs numerically
+	crs := make([]string, 0, len(crSet))
+	for cr := range crSet {
+		crs = append(crs, cr)
+	}
+	sort.Slice(crs, func(i, j int) bool {
+		return crValue(crs[i]) < crValue(crs[j])
+	})
+	r.availableCRs = crs
+}
+
+func sortedKeys(m map[string]bool) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
+}
+
+func (r *MonsterRepository) SearchWithFilters(filters monster.SearchFilters) []monster.Monster {
+	query := strings.ToLower(filters.Query)
+	var result []monster.Monster
+
+	crMin := float64(-1)
+	crMax := float64(1_000_000)
+	if filters.CRMin != "" {
+		crMin = crValue(filters.CRMin)
+	}
+	if filters.CRMax != "" {
+		crMax = crValue(filters.CRMax)
+	}
+
+	for _, m := range r.monsters {
+		if filters.MaxXP > 0 && m.XP > filters.MaxXP {
+			continue
+		}
+		if query != "" && !strings.Contains(strings.ToLower(m.Name), query) {
+			continue
+		}
+		if filters.Type != "" && m.Type != filters.Type {
+			continue
+		}
+		if filters.Size != "" && m.Size != filters.Size {
+			continue
+		}
+		cr := crValue(m.CR)
+		if cr < crMin || cr > crMax {
+			continue
+		}
+		result = append(result, m)
+	}
+	return result
+}
+
+func (r *MonsterRepository) AvailableTypes() []string {
+	return r.availableTypes
+}
+
+func (r *MonsterRepository) AvailableSizes() []string {
+	return r.availableSizes
+}
+
+func (r *MonsterRepository) AvailableCRs() []string {
+	return r.availableCRs
 }

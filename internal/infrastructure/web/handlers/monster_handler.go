@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 
 	monsterApp "github.com/emiliopalmerini/due-draghi-combattimenti/internal/application/monster"
+	monsterDomain "github.com/emiliopalmerini/due-draghi-combattimenti/internal/domain/monster"
 	"github.com/emiliopalmerini/due-draghi-combattimenti/internal/infrastructure/web/templates"
 )
 
@@ -26,7 +27,7 @@ func NewMonsterHandler(service *monsterApp.Service, logger *slog.Logger) *Monste
 }
 
 // SearchHandler handles monster search requests via HTMX.
-// GET /api/monsters?max_xp=N&q=search
+// GET /api/monsters?max_xp=N&q=search&type=T&size=S&cr_min=X&cr_max=Y
 func (h *MonsterHandler) SearchHandler(w http.ResponseWriter, r *http.Request) {
 	requestID := middleware.GetReqID(r.Context())
 
@@ -41,8 +42,16 @@ func (h *MonsterHandler) SearchHandler(w http.ResponseWriter, r *http.Request) {
 		maxXP = parsed
 	}
 
-	query := r.URL.Query().Get("q")
-	monsters := h.service.SearchMonsters(query, maxXP)
+	filters := monsterDomain.SearchFilters{
+		Query: r.URL.Query().Get("q"),
+		MaxXP: maxXP,
+		Type:  r.URL.Query().Get("type"),
+		Size:  r.URL.Query().Get("size"),
+		CRMin: r.URL.Query().Get("cr_min"),
+		CRMax: r.URL.Query().Get("cr_max"),
+	}
+
+	monsters := h.service.SearchMonstersWithFilters(filters)
 
 	w.Header().Set("Content-Type", "text/html")
 	if err := templates.MonsterList(monsters, maxXP).Render(r.Context(), w); err != nil {

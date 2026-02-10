@@ -2,6 +2,8 @@ package memory
 
 import (
 	"testing"
+
+	"github.com/emiliopalmerini/due-draghi-combattimenti/internal/domain/monster"
 )
 
 func TestNewMonsterRepository_LoadsMonsters(t *testing.T) {
@@ -170,6 +172,161 @@ func TestSearch_EmptyQuery_ReturnsAllUpToMaxXP(t *testing.T) {
 	all := repo.Search("", 1_000_000)
 	if len(all) != 330 {
 		t.Errorf("expected 330 monsters with empty query, got %d", len(all))
+	}
+}
+
+func TestNormalizeSize(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"Minuscolo", "Minuscola"},
+		{"Minuscola", "Minuscola"},
+		{"Piccolo", "Piccola"},
+		{"Piccola", "Piccola"},
+		{"Medio", "Media"},
+		{"Media", "Media"},
+		{"Grande", "Grande"},
+		{"Enorme", "Enorme"},
+		{"Mastodontico", "Mastodontica"},
+		{"Mastodontica", "Mastodontica"},
+		{"Media o Piccola", "Media"},
+		{"Medio o Piccolo", "Media"},
+		{"Grande di bestie Minuscole", "Grande"},
+		{"Medio di bestie Minuscole", "Media"},
+		{"Medio di non morti Minuscoli", "Media"},
+	}
+	for _, tt := range tests {
+		got := normalizeSize(tt.input)
+		if got != tt.expected {
+			t.Errorf("normalizeSize(%q) = %q, want %q", tt.input, got, tt.expected)
+		}
+	}
+}
+
+func TestCRValue(t *testing.T) {
+	tests := []struct {
+		cr       string
+		expected float64
+	}{
+		{"0", 0},
+		{"1/8", 0.125},
+		{"1/4", 0.25},
+		{"1/2", 0.5},
+		{"1", 1},
+		{"10", 10},
+		{"30", 30},
+	}
+	for _, tt := range tests {
+		got := crValue(tt.cr)
+		if got != tt.expected {
+			t.Errorf("crValue(%q) = %v, want %v", tt.cr, got, tt.expected)
+		}
+	}
+}
+
+func TestSearchWithFilters_ByType(t *testing.T) {
+	repo := NewMonsterRepository()
+	filters := monster.SearchFilters{MaxXP: 1_000_000, Type: "Drago"}
+	results := repo.SearchWithFilters(filters)
+	if len(results) == 0 {
+		t.Fatal("expected some dragons")
+	}
+	for _, m := range results {
+		if m.Type != "Drago" {
+			t.Errorf("expected type Drago, got %s for %s", m.Type, m.Name)
+		}
+	}
+}
+
+func TestSearchWithFilters_BySize(t *testing.T) {
+	repo := NewMonsterRepository()
+	filters := monster.SearchFilters{MaxXP: 1_000_000, Size: "Grande"}
+	results := repo.SearchWithFilters(filters)
+	if len(results) == 0 {
+		t.Fatal("expected some Grande monsters")
+	}
+	for _, m := range results {
+		if m.Size != "Grande" {
+			t.Errorf("expected size Grande, got %s for %s", m.Size, m.Name)
+		}
+	}
+}
+
+func TestSearchWithFilters_ByCRRange(t *testing.T) {
+	repo := NewMonsterRepository()
+	filters := monster.SearchFilters{MaxXP: 1_000_000, CRMin: "5", CRMax: "10"}
+	results := repo.SearchWithFilters(filters)
+	if len(results) == 0 {
+		t.Fatal("expected some monsters in CR 5-10")
+	}
+	for _, m := range results {
+		cr := crValue(m.CR)
+		if cr < 5 || cr > 10 {
+			t.Errorf("monster %s has CR %s (%.2f), expected 5-10", m.Name, m.CR, cr)
+		}
+	}
+}
+
+func TestSearchWithFilters_Combined(t *testing.T) {
+	repo := NewMonsterRepository()
+	filters := monster.SearchFilters{
+		MaxXP: 1_000_000,
+		Query: "drago",
+		Type:  "Drago",
+		CRMin: "1",
+	}
+	results := repo.SearchWithFilters(filters)
+	if len(results) == 0 {
+		t.Fatal("expected some dragons with CR >= 1")
+	}
+	for _, m := range results {
+		if m.Type != "Drago" {
+			t.Errorf("expected type Drago, got %s", m.Type)
+		}
+		if crValue(m.CR) < 1 {
+			t.Errorf("expected CR >= 1, got %s", m.CR)
+		}
+	}
+}
+
+func TestAvailableTypes(t *testing.T) {
+	repo := NewMonsterRepository()
+	types := repo.AvailableTypes()
+	if len(types) == 0 {
+		t.Fatal("expected some types")
+	}
+	// Should be sorted
+	for i := 1; i < len(types); i++ {
+		if types[i] < types[i-1] {
+			t.Errorf("types not sorted: %s before %s", types[i-1], types[i])
+		}
+	}
+}
+
+func TestAvailableSizes(t *testing.T) {
+	repo := NewMonsterRepository()
+	sizes := repo.AvailableSizes()
+	if len(sizes) == 0 {
+		t.Fatal("expected some sizes")
+	}
+	// All sizes should be normalized (no masculine forms)
+	for _, s := range sizes {
+		if s == "Minuscolo" || s == "Piccolo" || s == "Medio" || s == "Mastodontico" {
+			t.Errorf("size %q should have been normalized", s)
+		}
+	}
+}
+
+func TestAvailableCRs(t *testing.T) {
+	repo := NewMonsterRepository()
+	crs := repo.AvailableCRs()
+	if len(crs) == 0 {
+		t.Fatal("expected some CRs")
+	}
+	// First should be 0 or lowest
+	if crs[0] != "0" {
+		t.Errorf("expected first CR to be 0, got %s", crs[0])
 	}
 }
 

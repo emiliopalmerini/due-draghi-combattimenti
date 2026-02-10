@@ -49,7 +49,7 @@ func NewApp(cfg *config.Config, logger *slog.Logger) (*App, error) {
 	monsterService := monsterApp.NewService(monsterRepo)
 
 	// Initialize HTTP handlers
-	encounterHandler := handlers.NewEncounterHandler(encounterService, queryHandler, logger)
+	encounterHandler := handlers.NewEncounterHandler(encounterService, queryHandler, monsterService, logger)
 	monsterHandler := handlers.NewMonsterHandler(monsterService, logger)
 
 	app := &App{

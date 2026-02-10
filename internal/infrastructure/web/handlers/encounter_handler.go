@@ -13,22 +13,25 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 
 	"github.com/emiliopalmerini/due-draghi-combattimenti/internal/application/encounter"
+	monsterApp "github.com/emiliopalmerini/due-draghi-combattimenti/internal/application/monster"
 	"github.com/emiliopalmerini/due-draghi-combattimenti/internal/infrastructure/web/templates"
 )
 
 // EncounterHandler handles HTTP requests for encounter-related operations
 type EncounterHandler struct {
-	service      *encounter.Service
-	queryHandler *encounter.QueryHandler
-	logger       *slog.Logger
+	service        *encounter.Service
+	queryHandler   *encounter.QueryHandler
+	monsterService *monsterApp.Service
+	logger         *slog.Logger
 }
 
 // NewEncounterHandler creates a new encounter HTTP handler
-func NewEncounterHandler(service *encounter.Service, queryHandler *encounter.QueryHandler, logger *slog.Logger) *EncounterHandler {
+func NewEncounterHandler(service *encounter.Service, queryHandler *encounter.QueryHandler, monsterService *monsterApp.Service, logger *slog.Logger) *EncounterHandler {
 	return &EncounterHandler{
-		service:      service,
-		queryHandler: queryHandler,
-		logger:       logger,
+		service:        service,
+		queryHandler:   queryHandler,
+		monsterService: monsterService,
+		logger:         logger,
 	}
 }
 
@@ -151,7 +154,12 @@ func (h *EncounterHandler) CalculateHandler(w http.ResponseWriter, r *http.Reque
 
 	// Return HTML response for HTMX
 	w.Header().Set("Content-Type", "text/html")
-	if err := templates.Result(result).Render(r.Context(), w); err != nil {
+	facets := templates.MonsterFacets{
+		Types: h.monsterService.AvailableTypes(),
+		Sizes: h.monsterService.AvailableSizes(),
+		CRs:   h.monsterService.AvailableCRs(),
+	}
+	if err := templates.Result(result, facets).Render(r.Context(), w); err != nil {
 		h.logger.Error("Failed to render result template", "request_id", requestID, "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return

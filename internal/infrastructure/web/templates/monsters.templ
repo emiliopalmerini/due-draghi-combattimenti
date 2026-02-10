@@ -225,7 +225,7 @@ templ MonsterList(monsters []monster.Monster, maxXP int) {
 	</div>
 }
 
-templ MonsterBrowser(maxXP int) {
+templ MonsterBrowser(maxXP int, types []string, sizes []string, crs []string) {
 	<div class="monster-browser">
 		<h3>Seleziona Mostri</h3>
 		<div class="monster-search-bar">
@@ -233,28 +233,102 @@ templ MonsterBrowser(maxXP int) {
 				type="text"
 				name="q"
 				placeholder="Cerca un mostro..."
-				class="field monster-search-input"
+				class="field monster-search-input monster-filter"
 				hx-get="/api/monsters"
 				hx-trigger="input changed delay:300ms, search"
 				hx-target="#monster-results"
-				hx-include="[name='max_xp']"
+				hx-include=".monster-filter"
 			/>
-			<input type="hidden" name="max_xp" value={ strconv.Itoa(maxXP) }/>
+			<input type="hidden" name="max_xp" class="monster-filter" value={ strconv.Itoa(maxXP) }/>
 		</div>
-		<div class="monster-selected">
-			<h4>Mostri Selezionati: <span id="selected-count">0</span></h4>
-			<div id="selected-monsters-list"></div>
-			<div class="monster-xp-tracker">
-				<span>PE Usati: <strong id="xp-used">0</strong> / <strong>{ strconv.Itoa(maxXP) }</strong></span>
-				<span id="xp-remaining" class="xp-remaining">Rimanenti: <strong>{ strconv.Itoa(maxXP) }</strong></span>
+		<div class="monster-content">
+			<div class="monster-filters">
+				<div class="monster-filter-group">
+					<label class="monster-filter-label" for="filter-type">Tipo</label>
+					<select
+						id="filter-type"
+						name="type"
+						class="field monster-filter"
+						hx-get="/api/monsters"
+						hx-trigger="change"
+						hx-target="#monster-results"
+						hx-include=".monster-filter"
+					>
+						<option value="">Tutti</option>
+						for _, t := range types {
+							<option value={ t }>{ t }</option>
+						}
+					</select>
+				</div>
+				<div class="monster-filter-group">
+					<label class="monster-filter-label" for="filter-size">Taglia</label>
+					<select
+						id="filter-size"
+						name="size"
+						class="field monster-filter"
+						hx-get="/api/monsters"
+						hx-trigger="change"
+						hx-target="#monster-results"
+						hx-include=".monster-filter"
+					>
+						<option value="">Tutte</option>
+						for _, s := range sizes {
+							<option value={ s }>{ s }</option>
+						}
+					</select>
+				</div>
+				<div class="monster-filter-group">
+					<label class="monster-filter-label" for="filter-cr-min">GS Min</label>
+					<select
+						id="filter-cr-min"
+						name="cr_min"
+						class="field monster-filter"
+						hx-get="/api/monsters"
+						hx-trigger="change"
+						hx-target="#monster-results"
+						hx-include=".monster-filter"
+					>
+						<option value="">--</option>
+						for _, cr := range crs {
+							<option value={ cr }>{ cr }</option>
+						}
+					</select>
+				</div>
+				<div class="monster-filter-group">
+					<label class="monster-filter-label" for="filter-cr-max">GS Max</label>
+					<select
+						id="filter-cr-max"
+						name="cr_max"
+						class="field monster-filter"
+						hx-get="/api/monsters"
+						hx-trigger="change"
+						hx-target="#monster-results"
+						hx-include=".monster-filter"
+					>
+						<option value="">--</option>
+						for _, cr := range crs {
+							<option value={ cr }>{ cr }</option>
+						}
+					</select>
+				</div>
 			</div>
-		</div>
-		<div id="monster-results"
-			hx-get={ "/api/monsters?max_xp=" + strconv.Itoa(maxXP) }
-			hx-trigger="load"
-			hx-swap="innerHTML"
-		>
-			<p>Caricamento mostri...</p>
+			<div class="monster-results-column">
+				<div class="monster-selected">
+					<h4>Mostri Selezionati: <span id="selected-count">0</span></h4>
+					<div id="selected-monsters-list"></div>
+					<div class="monster-xp-tracker">
+						<span>PE Usati: <strong id="xp-used">0</strong> / <strong>{ strconv.Itoa(maxXP) }</strong></span>
+						<span id="xp-remaining" class="xp-remaining">Rimanenti: <strong>{ strconv.Itoa(maxXP) }</strong></span>
+					</div>
+				</div>
+				<div id="monster-results"
+					hx-get={ "/api/monsters?max_xp=" + strconv.Itoa(maxXP) }
+					hx-trigger="load"
+					hx-swap="innerHTML"
+				>
+					<p>Caricamento mostri...</p>
+				</div>
+			</div>
 		</div>
 	</div>
 }

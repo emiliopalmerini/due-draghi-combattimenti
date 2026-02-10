@@ -5,7 +5,14 @@ import (
 	"github.com/emiliopalmerini/due-draghi-combattimenti/internal/application/encounter"
 )
 
-templ Result(result *encounter.CalculateXPResponse) {
+// MonsterFacets holds the available filter options for the monster browser.
+type MonsterFacets struct {
+	Types []string
+	Sizes []string
+	CRs   []string
+}
+
+templ Result(result *encounter.CalculateXPResponse, facets MonsterFacets) {
 	<div class="result-card">
 		<!-- Header with XP -->
 		<div class="result-header">
@@ -37,7 +44,7 @@ templ Result(result *encounter.CalculateXPResponse) {
 
 		<!-- Monster Browser -->
 		if result.Ruleset == "2024" {
-			@MonsterBrowser(result.TotalXP)
+			@MonsterBrowser(result.TotalXP, facets.Types, facets.Sizes, facets.CRs)
 		}
 	</div>
 
